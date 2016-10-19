@@ -92,6 +92,8 @@ WebVRConfig = {
   -->
 <script src="build/webvr-manager.js"></script>
 
+<script src="loaders/ColladaLoader.js"></script>
+
 
 <script>
 // Setup three.js WebGL renderer. Note: Antialiasing is a big performance hit.
@@ -145,6 +147,23 @@ function onTextureLoaded(texture) {
 }
 
 
+var server;
+var loader = new THREE.ColladaLoader();
+loader.options.convertUpAxis = true;
+loader.load( 'asset_src/server3.dae', function ( collada ) {
+  server = collada.scene
+  scene.add(server)
+
+});
+
+// var light = new THREE.pointLight
+
+var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+scene.add( light );
+
+
+
+
 // Create a VR manager helper to enter and exit VR mode.
 var params = {
   hideButton: false, // Default: false.
@@ -162,6 +181,7 @@ cube.position.set(0, controls.userHeight, -1);
 
 // Add cube mesh to your three.js scene
 scene.add(cube);
+
 
 window.addEventListener('resize', onResize, true);
 window.addEventListener('vrdisplaypresentchange', onResize, true);
@@ -194,6 +214,10 @@ var vrDisplay;
 // Get the HMD, and if we're dealing with something that specifies
 // stageParameters, rearrange the scene.
 function setupStage() {
+  // server.scale.x = server.scale.y=server.scale.z= .5;
+  // server.updateMatrix();
+   server.position.set(0, controls.userHeight, 0);
+  scene.add(server)
   navigator.getVRDisplays().then(function(displays) {
     if (displays.length > 0) {
       vrDisplay = displays[0];
@@ -221,6 +245,12 @@ function setStageDimensions(stage) {
   // Place the cube in the middle of the scene, at user height.
   cube.position.set(0, controls.userHeight, 0);
 }
+
+
+
+
+
+
 
 </script>
 
