@@ -95,6 +95,7 @@
 
 <script src="loaders/ColladaLoader.js"></script>
 <script src="loaders/FBXLoader.js"></script>
+<script src="loaders/JSONLoader.js"></script>
 
 
 <script>
@@ -153,12 +154,29 @@
 
     var server;
     //////// TRY LOADING JSON 3D OBJECT //////////////
-    var serverJson;
-    var objectLoader = new THREE.ObjectLoader();
-    objectLoader.load("asset_src/server3.json", function(obj) {
-        scene.add(obj);
-        obj.position.set(0, controls.userHeight, -1);
-    });
+  var loader = new THREE.ObjectLoader();
+    loader.load("asset_src/brainServer.json", function(geo, mat){
+
+    var materials = new THREE.MeshFaceMaterial( mat );
+
+    var mesh = new THREE.Mesh(geo, materials);
+
+    scene.add(mesh)
+    mesh.position.set(-2, controls.userHeight, -1);
+    mesh.scale.set(.05,.05,.05)
+});
+
+    //
+    // var serverJson;
+    // var objectLoader = new THREE.ObjectLoader();
+    // objectLoader.load("asset_src/brainServer.json", function(obj) {
+    //   // var material = new THREE.MeshFaceMaterial(materials);
+    //   // serverJson = new THREE.Mesh(geometries, materials);
+    //     scene.add(obj);
+    //     obj.position.set(-2, controls.userHeight, -1);
+    //     obj.scale.set(.15,.15,.15)
+    //
+    // });
 
     //////////END LOADING JSON 3D OBJECT ///////////
 
