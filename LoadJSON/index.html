@@ -93,14 +93,13 @@
   -->
 <script src="build/webvr-manager.js"></script>
 
-<<<<<<< HEAD
-<!-- <script src="loaders/ColladaLoader.js"></script>
-<script src="loaders/FBXLoader.js"></script> -->
-=======
+
+
+
 <script src="loaders/ColladaLoader.js"></script>
 <script src="loaders/FBXLoader.js"></script>
 <script src="loaders/JSONLoader.js"></script>
->>>>>>> f6143679f9037678464ee79974011041bf014733
+
 
 
 <script>
@@ -157,76 +156,22 @@
     }
 
 
-    var server;
-    //////// TRY LOADING JSON 3D OBJECT //////////////
-  var loader = new THREE.ObjectLoader();
-    loader.load("asset_src/brainServer.json", function(geo, mat){
 
-    var materials = new THREE.MeshFaceMaterial( mat );
-
-    var mesh = new THREE.Mesh(geo, materials);
-
-    scene.add(mesh)
-    mesh.position.set(-2, controls.userHeight, -1);
-    mesh.scale.set(.05,.05,.05)
-});
-
-    //
-    // var serverJson;
-    // var objectLoader = new THREE.ObjectLoader();
-    // objectLoader.load("asset_src/brainServer.json", function(obj) {
+    var serverJson;
+    var objectLoader = new THREE.ObjectLoader();
+    objectLoader.load("asset_src/server02.json", function(obj) {
     //   // var material = new THREE.MeshFaceMaterial(materials);
     //   // serverJson = new THREE.Mesh(geometries, materials);
-    //     scene.add(obj);
-    //     obj.position.set(-2, controls.userHeight, -1);
-    //     obj.scale.set(.15,.15,.15)
+        scene.add(obj);
+        obj.position.set(-2, controls.userHeight, -1);
+        obj.scale.set(.15,.15,.15)
     //
-    // });
+    });
 
     //////////END LOADING JSON 3D OBJECT ///////////
 
 
 
-
-    ////////////// TRY LOADING DAE ////////////////
-
-    // var loader = new THREE.ColladaLoader();
-    // loader.options.convertUpAxis = true;
-    // loader.load('asset_src/server3.dae', function(collada) {
-    //     server = collada.scene
-    //     scene.add(server)
-    //
-    // });
-
-    /////////END LOADING JSON 3D OBJECT /////////////
-
-
-    ////////////TRY LOADING FBX ////////////
-    // var manager = new THREE.LoadingManager();
-    // manager.onProgress = function(item, loaded, total) {
-    //     console.log(item, loaded, total);
-    // };
-    // var onProgress = function(xhr) {
-    //     if (xhr.lengthComputable) {
-    //         var percentComplete = xhr.loaded / xhr.total * 100;
-    //         console.log(Math.round(percentComplete, 2) + '% downloaded');
-    //     }
-    // };
-    // var onError = function(xhr) {};
-    // var loader = new THREE.FBXLoader(manager);
-    // loader.load('asset_src/server.fbx', function(object) {
-    //     object.traverse(function(child) {
-    //         // if (child instanceof THREE.Mesh) {
-    //         //     // pass
-    //         // }
-    //
-    //     });
-    //     scene.add(object);
-    //     object.position.set(0, controls.userHeight, 0);
-    //
-    // }, onProgress, onError);
-
-    //////////////END LOADING FBX ////////////////////
 
 
     var light = new THREE.AmbientLight(0x404040); // soft white light
