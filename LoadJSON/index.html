@@ -127,6 +127,19 @@
     var effect = new THREE.VREffect(renderer);
     effect.setSize(window.innerWidth, window.innerHeight);
 
+    var light = new THREE.PointLight(0xff0000, 1, 100);
+    light.position.set(5, 50, 50);
+    scene.add(light);
+    var sphereSize = 1;
+    var pointLightHelper = new THREE.PointLightHelper(light, sphereSize);
+    scene.add(pointLightHelper);
+    var light = new THREE.PointLight(0xffffff, 1, 100);
+    light.position.set(-5, 5, 5);
+    scene.add(light);
+    var sphereSize = 1;
+    var pointLightHelper = new THREE.PointLightHelper(light, sphereSize);
+    scene.add(pointLightHelper);
+
 
     // Add a repeating grid as a skybox.
     var boxSize = 5;
@@ -155,35 +168,66 @@
         setupStage();
     }
 
+    var serverObject;
+    var allBrains = []
+    var xCenter;
+    var zCenter;
+    var spacing = .2;
 
-    var objectLoader = new THREE.ObjectLoader();
-    objectLoader.load("asset_src/server02.json", function(obj) {
+          var objectLoader = new THREE.ObjectLoader();
+          objectLoader.load("asset_src/model.json", function(obj) {
 
-    var cubeMaterial1 = new THREE.MeshBasicMaterial( { color: 0xb7b7b7, refractionRatio: 0.98 } );
-    var material1 = new THREE.MeshStandardMaterial( {
-					opacity: .3,
-					transparent: true
-				} );
+              //give it a global name, so I can access it later
+              serverObject = obj
 
-    obj.children[0].position.set(-2, controls.userHeight, -1);
-    obj.children[0].scale.set(.15,.15,.15)
-    console.log(obj)
+              //see what's inside of it
+               obj.traverse( function ( child ) {
+                    if ( child instanceof THREE.Mesh ) {
+                      console.log(child)
+                    }
+               })
+              //was trying to add transparency this way, but ended up
+              //going through the editor to apply it
+              var cubeMaterial1 = new THREE.MeshBasicMaterial({
+                  color: 0xb7b7b7,
+                  refractionRatio: 0.98
+              });
+              var material1 = new THREE.MeshStandardMaterial({
+                  opacity: .3,
+                  transparent: true
+              });
 
-    var mshGlass = obj.children[0].clone();
-    mshGlass.material = material1;
-    scene.add(mshGlass);
+              //not sure about this line, it does'nt do anything
+              // serverObject = new THREE.Mesh( obj, cubeMaterial1 );
 
-});
-    // objectLoader.load("asset_src/server02.json", function(obj) {
-    // //   // var material = new THREE.MeshFaceMaterial(materials);
-    // //   // serverJson = new THREE.Mesh(geometries, materials);
-    //     scene.add(obj);
-    //     obj.position.set(-2, controls.userHeight, -1);
-    //     obj.scale.set(.15,.15,.15)
-    // //
-    // });
 
-    //////////END LOADING JSON 3D OBJECT ///////////
+              for (var i = 0; i < 20; i++) {
+                xCenter = Math.cos(toRadians(i * spacing))
+                zCenter = Math.sin(toRadians(i * spacing))
+                obj.scale.set(.09, .09, .09)
+                // obj.position.set(xCenter, controls.userHeight - 1, zCenter);
+                obj.position.set((i*.1), controls.userHeight - 1, i*.1);
+                scene.add(obj);
+                allBrains.push(serverObject)
+
+                }
+
+                console.log(allBrains)
+
+
+
+
+
+
+          });
+
+
+    function toRadians(angle) {
+        return angle * (Math.PI / 180);
+    }
+
+
+
 
 
 
