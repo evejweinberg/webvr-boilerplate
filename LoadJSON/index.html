@@ -156,17 +156,32 @@
     }
 
 
-
-    var serverJson;
     var objectLoader = new THREE.ObjectLoader();
     objectLoader.load("asset_src/server02.json", function(obj) {
-    //   // var material = new THREE.MeshFaceMaterial(materials);
-    //   // serverJson = new THREE.Mesh(geometries, materials);
-        scene.add(obj);
-        obj.position.set(-2, controls.userHeight, -1);
-        obj.scale.set(.15,.15,.15)
-    //
-    });
+
+    var cubeMaterial1 = new THREE.MeshBasicMaterial( { color: 0xb7b7b7, refractionRatio: 0.98 } );
+    var material1 = new THREE.MeshStandardMaterial( {
+					opacity: .3,
+					transparent: true
+				} );
+
+    obj.children[0].position.set(-2, controls.userHeight, -1);
+    obj.children[0].scale.set(.15,.15,.15)
+    console.log(obj)
+
+    var mshGlass = obj.children[0].clone();
+    mshGlass.material = material1;
+    scene.add(mshGlass);
+
+});
+    // objectLoader.load("asset_src/server02.json", function(obj) {
+    // //   // var material = new THREE.MeshFaceMaterial(materials);
+    // //   // serverJson = new THREE.Mesh(geometries, materials);
+    //     scene.add(obj);
+    //     obj.position.set(-2, controls.userHeight, -1);
+    //     obj.scale.set(.15,.15,.15)
+    // //
+    // });
 
     //////////END LOADING JSON 3D OBJECT ///////////
 
