@@ -144,24 +144,34 @@
     // Add a repeating grid as a skybox.
     var boxSize = 5;
     var loader = new THREE.TextureLoader();
-    loader.load('img/box.png', onTextureLoaded);
+    loader.load('img/bg2.png', onTextureLoaded);
 
     function onTextureLoaded(texture) {
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.set(boxSize, boxSize);
+        // texture.repeat.set(boxSize * .2, boxSize * .2);
 
-        var geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
+        var geometry = new THREE.SphereGeometry(boxSize, boxSize, boxSize);
         var material = new THREE.MeshBasicMaterial({
             map: texture,
-            color: 0x01BE00,
+            color: 0xffffff,
             side: THREE.BackSide
         });
+
 
         // Align the skybox to the floor (which is at y=0).
         skybox = new THREE.Mesh(geometry, material);
         skybox.position.y = boxSize / 2;
-        scene.add(skybox);
+        // scene.add(skybox);
+
+        var geometry = new THREE.SphereGeometry(80, 32, 32);
+        // var material = new THREE.MeshBasicMaterial({
+        //     color: 0xffff00
+        // });
+        var sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+
+        ///end bg image on sphere ///////
 
         // For high end VR devices like Vive and Oculus, take into account the stage
         // parameters provided.
@@ -172,54 +182,40 @@
     var allBrains = []
     var xCenter;
     var zCenter;
-    var spacing = .2;
+    var newServ;
+    var numberOfservers = 15;
+    var spacing = 360 / numberOfservers;
 
-          var objectLoader = new THREE.ObjectLoader();
-          objectLoader.load("asset_src/model.json", function(obj) {
+    var objectLoader = new THREE.ObjectLoader();
+    objectLoader.load("asset_src/model.json", function(obj) {
 
-              //give it a global name, so I can access it later
-              serverObject = obj
+        //give it a global name, so I can access it later
+        serverObject = obj
 
-              //see what's inside of it
-               obj.traverse( function ( child ) {
-                    if ( child instanceof THREE.Mesh ) {
-                      console.log(child)
-                    }
-               })
-              //was trying to add transparency this way, but ended up
-              //going through the editor to apply it
-              var cubeMaterial1 = new THREE.MeshBasicMaterial({
-                  color: 0xb7b7b7,
-                  refractionRatio: 0.98
-              });
-              var material1 = new THREE.MeshStandardMaterial({
-                  opacity: .3,
-                  transparent: true
-              });
-
-              //not sure about this line, it does'nt do anything
-              // serverObject = new THREE.Mesh( obj, cubeMaterial1 );
+        //see what's inside of it
+        obj.traverse(function(child) {
+            if (child instanceof THREE.Mesh) {
+                console.log(child)
+            }
+        })
 
 
-              for (var i = 0; i < 20; i++) {
-                xCenter = Math.cos(toRadians(i * spacing))
-                zCenter = Math.sin(toRadians(i * spacing))
-                obj.scale.set(.09, .09, .09)
-                // obj.position.set(xCenter, controls.userHeight - 1, zCenter);
-                obj.position.set((i*.1), controls.userHeight - 1, i*.1);
-                scene.add(obj);
-                allBrains.push(serverObject)
+        for (var i = 0; i < numberOfservers; i++) {
+            var tempNew = serverObject.clone()
+            xCenter = Math.cos(toRadians(i * spacing))
+            zCenter = Math.sin(toRadians(i * spacing))
+            tempNew.scale.set(.05, .05, .05)
+            tempNew.position.set(xCenter, controls.userHeight - .2, zCenter);
+            // tempNew.position.set((i * .1), controls.userHeight - 1, i * .1);
+            allBrains.push(tempNew)
+            scene.add(allBrains[i]);
 
-                }
+        }
 
-                console.log(allBrains)
+        console.log(allBrains)
 
+    });
 
-
-
-
-
-          });
 
 
     function toRadians(angle) {
@@ -255,7 +251,7 @@
     cube.position.set(0, controls.userHeight, -1);
 
     // Add cube mesh to your three.js scene
-    scene.add(cube);
+    // scene.add(cube);
 
 
     window.addEventListener('resize', onResize, true);
