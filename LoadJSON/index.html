@@ -164,7 +164,7 @@
         skybox.position.y = boxSize / 2;
         // scene.add(skybox);
 
-        var geometry = new THREE.SphereGeometry(80, 32, 32);
+        var geometry = new THREE.SphereGeometry(380, 32, 32);
         // var material = new THREE.MeshBasicMaterial({
         //     color: 0xffff00
         // });
@@ -185,6 +185,8 @@
     var newServ;
     var numberOfservers = 15;
     var spacing = 360 / numberOfservers;
+    var ServersInRows = 10;
+    var radius = 3
 
     var objectLoader = new THREE.ObjectLoader();
     objectLoader.load("asset_src/model.json", function(obj) {
@@ -199,11 +201,12 @@
             }
         })
 
+  for (var j = 0; j < ServersInRows; j++) {
+    for (var i = 0; i < numberOfservers; i++) {
+          var tempNew = serverObject.clone()
+            xCenter = Math.cos(toRadians(i * spacing))*1+(j*.001)
 
-        for (var i = 0; i < numberOfservers; i++) {
-            var tempNew = serverObject.clone()
-            xCenter = Math.cos(toRadians(i * spacing))
-            zCenter = Math.sin(toRadians(i * spacing))
+            zCenter = Math.sin(toRadians(i * spacing))*1+(j*.001)
             tempNew.scale.set(.05, .05, .05)
             tempNew.position.set(xCenter, controls.userHeight - .2, zCenter);
             // tempNew.position.set((i * .1), controls.userHeight - 1, i * .1);
@@ -212,7 +215,9 @@
 
         }
 
-        console.log(allBrains)
+      }
+
+        console.log(allBrains.length)
 
     });
 
@@ -228,7 +233,7 @@
 
 
 
-
+var increment = .1
     var light = new THREE.AmbientLight(0x404040); // soft white light
     scene.add(light);
 
@@ -261,6 +266,18 @@
     var lastRender = 0;
 
     function animate(timestamp) {
+      // console.log('called')
+
+      for (var i in allBrains){
+        if (allBrains[i].children[0].position.z>7.6){
+          increment = -0.005
+        }
+        if (allBrains[i].children[0].position.z<7.3){
+          increment = .005
+        }
+
+        allBrains[i].children[0].position.z+=increment
+      }
         var delta = Math.min(timestamp - lastRender, 500);
         lastRender = timestamp;
 
