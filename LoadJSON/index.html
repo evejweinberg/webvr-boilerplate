@@ -187,12 +187,40 @@
     var spacing = 360 / numberOfservers;
     var ServersInRows = 10;
     var radius = 3
+    var brainHeight = .1
+
+    var r = "img/";
+
+    var urls = [
+        r + "px.jpg", r + "nx.jpg",
+        r + "py.jpg", r + "ny.jpg",
+        r + "pz.jpg", r + "nz.jpg"
+    ];
+
+    var textureCube = new THREE.CubeTextureLoader().load(urls);
+    textureCube.mapping = THREE.CubeReflectionMapping;
+    var reflectionMat = new THREE.MeshBasicMaterial({
+        color: 0x9be2ff,
+        envMap: textureCube,
+        refractionRatio: 0.98,
+        transparent: true,
+        opacity: .2,
+        reflectivity: 0.9
+    })
+    var reflectionMatBrain = new THREE.MeshBasicMaterial({
+        color: 0xffc0cb,
+        envMap: textureCube,
+        refractionRatio: 0.98,
+        reflectivity: 0.9
+    })
 
     var objectLoader = new THREE.ObjectLoader();
     objectLoader.load("asset_src/model.json", function(obj) {
 
         //give it a global name, so I can access it later
         serverObject = obj
+        serverObject.children[1].material = reflectionMat
+        serverObject.children[0].material = reflectionMatBrain
 
         //see what's inside of it
         obj.traverse(function(child) {
@@ -200,25 +228,24 @@
                 console.log(child)
             }
         })
+        for (var j = 0; j <= ServersInRows; j++) {
+            for (var i = 0; i <= numberOfservers; i++) {
 
-    for (var i = 0; i <= numberOfservers; i++) {
+                var tempNew = serverObject.clone();
 
-            var tempNew = serverObject.clone();
+                xCenter = Math.sin(toRadians(i * spacing) * (j + 1 * 1));
 
-            xCenter = Math.sin(toRadians(i * spacing));
+                zCenter = Math.cos(toRadians(i * spacing) * (j + 1 * 1));
 
-            zCenter = Math.cos(toRadians(i * spacing));
+                tempNew.scale.set(.05, .05, .05);
 
-            tempNew.scale.set(.05, .05, .05);
+                tempNew.position.set(xCenter, controls.userHeight - .2, zCenter);
 
-            tempNew.position.set(xCenter, controls.userHeight - .2, zCenter);
+                allBrains.push(tempNew);
 
-            // tempNew.position.set((i * .1), controls.userHeight - 1, i * .1);
+                scene.add(allBrains[i]);
 
-            allBrains.push(tempNew);
-
-            scene.add(allBrains[i]);
-
+            }
         }
 
 
@@ -238,7 +265,7 @@
 
 
 
-var increment = .1
+
     var light = new THREE.AmbientLight(0x404040); // soft white light
     scene.add(light);
 
@@ -271,18 +298,18 @@ var increment = .1
     var lastRender = 0;
 
     function animate(timestamp) {
-      // console.log('called')
+        // console.log('called')
 
-      for (var i in allBrains){
-        if (allBrains[i].children[0].position.z>7.6){
-          increment = -0.005
-        }
-        if (allBrains[i].children[0].position.z<7.3){
-          increment = .005
-        }
+        for (var i in allBrains) {
+            if (allBrains[i].children[0].position.z > 7.6) {
+                brainHeight = -0.005
+            }
+            if (allBrains[i].children[0].position.z < 7.3) {
+                brainHeight = .005
+            }
 
-        allBrains[i].children[0].position.z+=increment
-      }
+            allBrains[i].children[0].position.z += brainHeight
+        }
         var delta = Math.min(timestamp - lastRender, 500);
         lastRender = timestamp;
 
