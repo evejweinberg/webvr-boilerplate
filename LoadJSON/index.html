@@ -201,21 +201,26 @@
             }
         })
 
-  for (var j = 0; j < ServersInRows; j++) {
-    for (var i = 0; i < numberOfservers; i++) {
-          var tempNew = serverObject.clone()
-            xCenter = Math.cos(toRadians(i * spacing))*1+(j*.001)
+    for (var i = 0; i <= numberOfservers; i++) {
 
-            zCenter = Math.sin(toRadians(i * spacing))*1+(j*.001)
-            tempNew.scale.set(.05, .05, .05)
+            var tempNew = serverObject.clone();
+
+            xCenter = Math.sin(toRadians(i * spacing));
+
+            zCenter = Math.cos(toRadians(i * spacing));
+
+            tempNew.scale.set(.05, .05, .05);
+
             tempNew.position.set(xCenter, controls.userHeight - .2, zCenter);
+
             // tempNew.position.set((i * .1), controls.userHeight - 1, i * .1);
-            allBrains.push(tempNew)
+
+            allBrains.push(tempNew);
+
             scene.add(allBrains[i]);
 
         }
 
-      }
 
         console.log(allBrains.length)
 
