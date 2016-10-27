@@ -109,6 +109,18 @@
         antialias: true
     });
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMapEnabled = true;
+    // renderer.shadowMap.enabled = true;
+    renderer.shadowMapSoft = true;
+
+    renderer.shadowCameraNear = 3;
+    renderer.shadowCameraFar = 1000;
+    renderer.shadowCameraFov = 50;
+
+    renderer.shadowMapBias = 0.0039;
+    renderer.shadowMapDarkness = 0.5;
+    renderer.shadowMapWidth = 512;
+    renderer.shadowMapHeight = 512;
 
     // Append the canvas element created by the renderer to document body element.
     document.body.appendChild(renderer.domElement);
@@ -135,10 +147,44 @@
     scene.add(pointLightHelper);
     var light = new THREE.PointLight(0xffffff, 1, 100);
     light.position.set(-5, 5, 5);
+    light.castShadow = true;
     scene.add(light);
     var sphereSize = 1;
     var pointLightHelper = new THREE.PointLightHelper(light, sphereSize);
     scene.add(pointLightHelper);
+
+
+    //////LOAD FLOOR ////////
+    var loader2 = new THREE.TextureLoader();
+    loader2.load('img/Floor.jpg', onTextureLoaded2);
+
+    function onTextureLoaded2(texture) {
+        console.log('floor txt loaded')
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(400, 400);
+
+        var geometry = new THREE.BoxGeometry(300, 2, 300);
+
+        var material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            opacity: .4,
+            color: 0xffffff,
+            side: THREE.DoubleSide
+        });
+        var plane = new THREE.Mesh(geometry, material);
+        scene.add(plane);
+        plane.receiveShadow = true;
+        plane.position.y = 0;
+
+
+    }
+
+
+
+    //////////DONE LOADING FLOOR //////////
+
 
 
     // Add a repeating grid as a skybox.
@@ -168,13 +214,10 @@
         // var material = new THREE.MeshBasicMaterial({
         //     color: 0xffff00
         // });
-        var sphere = new THREE.Mesh(geometry, material);
-        scene.add(sphere);
+        var skysphere = new THREE.Mesh(geometry, material);
+        scene.add(skysphere);
 
-        ///end bg image on sphere ///////
 
-        // For high end VR devices like Vive and Oculus, take into account the stage
-        // parameters provided.
         setupStage();
     }
 
@@ -210,8 +253,8 @@
     var reflectionMatBrain = new THREE.MeshBasicMaterial({
         color: 0xffc0cb,
         envMap: textureCube,
-        refractionRatio: 0.98,
-        reflectivity: 0.9
+        refractionRatio: 0.92,
+        reflectivity: 0.7
     })
 
     var objectLoader = new THREE.ObjectLoader();
@@ -219,6 +262,8 @@
 
         //give it a global name, so I can access it later
         serverObject = obj
+
+        serverObject.castShadow = true;
         serverObject.children[1].material = reflectionMat
         serverObject.children[0].material = reflectionMatBrain
 
@@ -266,8 +311,29 @@
 
 
 
-    var light = new THREE.AmbientLight(0x404040); // soft white light
+    var light = new THREE.AmbientLight(0x404040, .5); // soft white light
     scene.add(light);
+
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(0, 11, 0);
+    directionalLight.castShadow = true;
+    directionalLight.shadow = new THREE.LightShadow(new THREE.PerspectiveCamera(50, 1, 1200, 2500));
+    directionalLight.castShadow = true
+    scene.add(directionalLight);
+
+    var directionalLight2 = new THREE.DirectionalLight(0x02f402, 1);
+    directionalLight2.position.set(0, 12, 0);
+    // directionalLight2.target = allBrains[0]
+    directionalLight2.castShadow = true
+    scene.add(directionalLight2);
+
+    var directionalLightR = new THREE.DirectionalLight(0xffc1e5, 1);
+    directionalLightR.position.set(0, 10, 0);
+    // directionalLight2.target.set(0, 0, 0)
+    directionalLightR.castShadow = true
+
+    scene.add(directionalLightR);
+
 
 
 
