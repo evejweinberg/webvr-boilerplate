@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <title>Web VR boilerplate</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background-color: #ffffff;
+            margin: 0;
+            overflow: hidden;
+            font-family: arial;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            top: 0px;
+            left: 0px;
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+
+
+
+
+    <script src="node_modules/es6-promise/dist/es6-promise.js"></script>
+
+    <script src="node_modules/three/build/three.min.js"></script>
+
+    <script src="loaders/JSONLoader.js"></script>
+
+
+
+    <script>
+        // Request animation frame loop function
+        var lastRender = 0;
+        var canvas;
+        var container;
+        var serverObject;
+        var allBrains = []
+        var xCenter;
+        var zCenter;
+        var newServ;
+        var numberOfservers = 15;
+        var spacing = 360 / numberOfservers;
+        var ServersInRows = 10;
+        var radius = 3
+        var brainHeight = .1
+        var cube
+
+        var r = "img/";
+
+        var urls = [
+            r + "px.jpg", r + "nx.jpg",
+            r + "py.jpg", r + "ny.jpg",
+            r + "pz.jpg", r + "nz.jpg"
+        ];
+
+        init()
+        animate()
+
+        function init() {
+
+
+
+            container = document.getElementById('container');
+
+
+            // Create a three.js scene.
+            var scene = new THREE.Scene();
+            // var SCREEN_WIDTH = window.innerWidth;
+            // var SCREEN_HEIGHT = window.innerHeight;
+
+            // Create a three.js camera.
+            var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+
+            var renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            // renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMapEnabled = true;
+            // renderer.shadowMap.enabled = true;
+            renderer.shadowMapSoft = true;
+
+            renderer.shadowCameraNear = 3;
+            renderer.shadowCameraFar = 1000;
+            renderer.shadowCameraFov = 50;
+
+            renderer.shadowMapBias = 0.0039;
+            renderer.shadowMapDarkness = 0.5;
+            renderer.shadowMapWidth = 512;
+            renderer.shadowMapHeight = 512;
+
+            // Append the canvas element created by the renderer to document body element.
+            container.appendChild(renderer.domElement);
+            var light = new THREE.PointLight(0xff0000, 1, 100);
+            light.position.set(5, 50, 50);
+            scene.add(light);
+            var sphereSize = 1;
+            var pointLightHelper = new THREE.PointLightHelper(light, light);
+            scene.add(pointLightHelper);
+            var light = new THREE.PointLight(0xffffff, 1, 100);
+            light.position.set(-5, 5, 5);
+            light.castShadow = true;
+            scene.add(light);
+            var sphereSize = 1;
+            var pointLightHelper = new THREE.PointLightHelper(light, sphereSize);
+            scene.add(pointLightHelper);
+
+            //////LOAD FLOOR ////////
+            var loader2 = new THREE.TextureLoader();
+            loader2.load('img/Floor.jpg', onTextureLoaded2);
+
+            function onTextureLoaded2(texture) {
+                console.log('floor txt loaded')
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(400, 400);
+
+                var geometry = new THREE.BoxGeometry(300, 2, 300);
+
+                var material = new THREE.MeshBasicMaterial({
+                    // map: texture,
+                    transparent: true,
+                    opacity: .4,
+                    color: 0x7ffc19,
+                    side: THREE.DoubleSide
+                });
+                var plane = new THREE.Mesh(geometry, material);
+                scene.add(plane);
+                plane.receiveShadow = true;
+                plane.position.y = 0;
+
+
+            } //////////DONE LOADING FLOOR //////////
+
+
+
+            // Add a repeating grid as a skybox.
+            var boxSize = 5;
+            var loader = new THREE.TextureLoader();
+            loader.load('img/bg2.png', onTextureLoaded);
+
+            function onTextureLoaded(texture) {
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+
+                var geometry = new THREE.SphereGeometry(boxSize, boxSize, boxSize);
+                var material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                    color: 0xffffff,
+                    side: THREE.BackSide
+                });
+
+                var geometry = new THREE.SphereGeometry(380, 32, 32);
+
+                var skysphere = new THREE.Mesh(geometry, material);
+                scene.add(skysphere);
+
+            }
+
+
+            var textureCube = new THREE.CubeTextureLoader().load(urls);
+            textureCube.mapping = THREE.CubeReflectionMapping;
+            var reflectionMat = new THREE.MeshBasicMaterial({
+                color: 0x9be2ff,
+                envMap: textureCube,
+                refractionRatio: 0.98,
+                transparent: true,
+                opacity: .2,
+                reflectivity: 0.9
+            })
+            var reflectionMatBrain = new THREE.MeshBasicMaterial({
+                color: 0xffc0cb,
+                envMap: textureCube,
+                refractionRatio: 0.92,
+                reflectivity: 0.7
+            })
+
+            var objectLoader = new THREE.ObjectLoader();
+            objectLoader.load("asset_src/model.json", function(obj) {
+
+                //give it a global name, so I can access it later
+                serverObject = obj
+
+                serverObject.castShadow = true;
+                serverObject.children[1].material = reflectionMat
+                serverObject.children[0].material = reflectionMatBrain
+
+                //see what's inside of it
+                obj.traverse(function(child) {
+                    if (child instanceof THREE.Mesh) {
+                        console.log(child)
+                    }
+                })
+                for (var j = 0; j <= ServersInRows; j++) {
+                    for (var i = 0; i <= numberOfservers; i++) {
+
+                        var tempNew = serverObject.clone();
+
+                        xCenter = Math.sin(toRadians(i * spacing) * (j + 1 * 1));
+
+                        zCenter = Math.cos(toRadians(i * spacing) * (j + 1 * 1));
+
+                        tempNew.scale.set(.05, .05, .05);
+
+                        tempNew.position.set(xCenter, 1, zCenter);
+
+                        allBrains.push(tempNew);
+
+                        scene.add(allBrains[i]);
+
+                    }
+                }
+
+
+                console.log(allBrains.length)
+
+            });
+
+
+
+
+
+            var light = new THREE.AmbientLight(0x404040, .5); // soft white light
+            scene.add(light);
+
+            var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+            directionalLight.position.set(0, 11, 0);
+            directionalLight.castShadow = true;
+            directionalLight.shadow = new THREE.LightShadow(new THREE.PerspectiveCamera(50, 1, 1200, 2500));
+            directionalLight.castShadow = true
+            scene.add(directionalLight);
+
+            var directionalLight2 = new THREE.DirectionalLight(0x02f402, 1);
+            directionalLight2.position.set(0, 12, 0);
+            // directionalLight2.target = allBrains[0]
+            directionalLight2.castShadow = true
+            scene.add(directionalLight2);
+
+            var directionalLightR = new THREE.DirectionalLight(0xffc1e5, 1);
+            directionalLightR.position.set(0, 10, 0);
+            // directionalLight2.target.set(0, 0, 0)
+            directionalLightR.castShadow = true
+
+            scene.add(directionalLightR);
+
+
+
+            // Create 3D objects.
+            var geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            var material = new THREE.MeshNormalMaterial();
+            cube = new THREE.Mesh(geometry, material);
+
+            // Position cube mesh to be right in front of you.
+            cube.position.set(0, 1, -1);
+
+            scene.add(cube);
+
+
+
+
+
+        }
+        //init over
+
+        window.addEventListener('resize', onResize, true);
+
+        function toRadians(angle) {
+            return angle * (Math.PI / 180);
+        }
+
+
+
+
+        function animate(timestamp) {
+            // console.log('called')
+
+            for (var i in allBrains) {
+                if (allBrains[i].children[0].position.z > 7.6) {
+                    brainHeight = -0.005
+                }
+                if (allBrains[i].children[0].position.z < 7.3) {
+                    brainHeight = .005
+                }
+
+                allBrains[i].children[0].position.z += brainHeight
+            }
+            var delta = Math.min(timestamp - lastRender, 500);
+            lastRender = timestamp;
+
+
+            cube.rotation.y += delta * 0.0006;
+
+
+            requestAnimationFrame(animate);
+        }
+
+        function onResize(e) {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+        }
+    </script>
+</body>
+
+</html>
